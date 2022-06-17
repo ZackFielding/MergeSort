@@ -2,11 +2,28 @@
 #include <iostream>
 #include <iomanip>
 #include <cstring>
+#include <vector>
 
-// [] pass everything into nameDirectory? -> call createNewDirectory() right from nameDirectory()
-// 		... OR change nameDirectory -> return char * (ISSUE -> if used dynamic mem,
-// 				can't account for it in main efficiently)
-// fix next [] pass createNewDirectory func as ptr into nameDirectory func (std::function??)
+//[] add block to nameDirectory() that creates the vector of char ptrs
+//		... that's passed into multiStrCat()
+
+char* multiStrCat(std::vector<char *> charVector){
+	int startIndex {0};	
+	size_t z {1}, y {0};
+
+	while(z < charVector.size()){
+	startIndex = std::strlen(charVector.at(0)); // starting point	
+		for(y ; y <= std::strlen(charVector.at(z)); ++y){
+			//appends to char[] at first index
+			// '<=' should copy null terminator (strlen stops at delim)
+			(charVector.at(0))[startIndex + y] = (charVector.at(z))[y];	
+		}
+	++z;
+	}
+
+	return charVector.at(0); // return first index char [] which was appended to with ea iteration
+};
+
 
 
 void nameDirectory(char *dir_ptr, const int &maxDirSize, bool &dirCheck, LPSECURITY_ATTRIBUTES access,
@@ -19,18 +36,18 @@ void nameDirectory(char *dir_ptr, const int &maxDirSize, bool &dirCheck, LPSECUR
 		// check to see if string sum of both string lengths < dir size
 	if(std::strlen(dir_ptr) + std::strlen(folderName) < maxDirSize){
 		dir_ptr = std::strcat(dir_ptr, folderName);
-		createNewDirectory(dirCheck, access, dir_ptr);
+		func(dirCheck, access, dir_ptr);
 	}else{
 		char *updatedDir{nullptr};
 		updatedDir = new char [std::strlen(dir_ptr) + std::strlen(folderName) + 5];
-		createNewDirectory(dirCheck, access, updatedDir); //same but passing dynamic alloc dir string
+		func(dirCheck, access, updatedDir); //same but passing dynamic alloc dir string
 		delete [] updatedDir; // free heap
 	}	
 
 };
 
 void createNewDirectory(bool &dirCheck, LPSECURITY_ATTRIBUTES access, char *dir_ptr){
-
+	DWORD threadError {16000}; // local thread error reciever
 	dirCheck = CreateDirectory(dir_ptr, access);	
 			threadError = GetLastError(); //returns previous threads error code
 			if(threadError != 0){
@@ -61,7 +78,7 @@ int main(){
 	DWORD curDirBuffer {50}, curDirLength {}; 
 
 	do{
-		curDirLength = GetCurrentDirectory(&curDirBuffer, dir);
+		curDirLength = GetCurrentDirectory(curDirBuffer, dir);
 
 		if(curDirLength == 0){ // returns -> 0 if failed to get current directory
 			std::cerr << "Return current directory failed.  Error "
