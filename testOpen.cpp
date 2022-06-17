@@ -6,8 +6,11 @@
 // [] pass everything into nameDirectory? -> call createNewDirectory() right from nameDirectory()
 // 		... OR change nameDirectory -> return char * (ISSUE -> if used dynamic mem,
 // 				can't account for it in main efficiently)
+// fix next [] pass createNewDirectory func as ptr into nameDirectory func (std::function??)
 
-void nameDirectory(char *dir_ptr, const int &maxDirSize){
+
+void nameDirectory(char *dir_ptr, const int &maxDirSize, bool &dirCheck, LPSECURITY_ATTRIBUTES access,
+		void(*func)(bool &dirCheck, LPSECURITY_ATTRIBUTES access, char *dir_ptr)){
    		// enter name of new directory folder .. append to dir
 	char folderName [25] {"NNF"}; //no name folder -> default
 	std::cout << "Enter name of new directory folder: " << std::endl;
@@ -16,11 +19,11 @@ void nameDirectory(char *dir_ptr, const int &maxDirSize){
 		// check to see if string sum of both string lengths < dir size
 	if(std::strlen(dir_ptr) + std::strlen(folderName) < maxDirSize){
 		dir_ptr = std::strcat(dir_ptr, folderName);
-		createNewDirectory();
+		createNewDirectory(dirCheck, access, dir_ptr);
 	}else{
 		char *updatedDir{nullptr};
-		updatedDir = new char [std::strlen(dir_ptr) + std::strlen(folder) + 5];
-		createNewDirectory();
+		updatedDir = new char [std::strlen(dir_ptr) + std::strlen(folderName) + 5];
+		createNewDirectory(dirCheck, access, updatedDir); //same but passing dynamic alloc dir string
 		delete [] updatedDir; // free heap
 	}	
 
@@ -56,7 +59,6 @@ int main(){
 	// create new directory?
 	// display current directory -> ask if you want it here
 	DWORD curDirBuffer {50}, curDirLength {}; 
-	char curDirStr [50];
 
 	do{
 		curDirLength = GetCurrentDirectory(&curDirBuffer, dir);
@@ -73,18 +75,16 @@ int main(){
 			char userAns {'D'}; //d --> default
 			std::cin >> userAns;
 			if (userAns == 'Y'){
-				nameDirectory(dir, maxDirSize);
-				createNewDirectory();	
+				nameDirectory(dir_ptr, maxDirSize, dirCheck, access, createNewDirectory);
 			}else if (userAns == 'N'){
-				changeCurrentDirectory();
-				nameDirectory(dir, maxDirSize);
-				createNewDirectory();	
+				//changeCurrentDirectory();
+				nameDirectory(dir_ptr, maxDirSize, dirCheck, access, createNewDirectory);
 			}else{
 				std::cerr << "Error in determining user direction." << std::endl;
 			}
 		}
 
-	}while(true); // will need to change
+	}while(false); // will need to change
 		
 	return 0;
 }
