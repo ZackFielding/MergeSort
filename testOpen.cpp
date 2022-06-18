@@ -4,24 +4,22 @@
 #include <cstring>
 #include <vector>
 
-//[] add block to nameDirectory() that creates the vector of char ptrs
-//		... that's passed into multiStrCat()
+// [x] fix multiStrCat
+// windows.h create new dir only works one directory at a time
+// 	[] chain create new dir based on number of folders entered by user
 
-char* multiStrCat(std::vector<char *> charVector){
+void multiStrCat(std::vector<char *> &charVector){ //passbyref vec of char ptrs
+
 	int startIndex {0};	
-	size_t z {1}, y {0};
-
-	while(z < charVector.size()){
-	startIndex = std::strlen(charVector.at(0)); // starting point	
-		for(y ; y <= std::strlen(charVector.at(z)); ++y){
-			//appends to char[] at first index
-			// '<=' should copy null terminator (strlen stops at delim)
-			(charVector.at(0))[startIndex + y] = (charVector.at(z))[y];	
+	for(size_t z {1}; z < charVector.size(); ++z){
+		startIndex = std::strlen(charVector.at(0)); // starting point	
+		for(size_t y {0} ; y <= std::strlen(charVector.at(z)); ++y){
+			charVector.at(0)[startIndex + y] = charVector.at(z)[y];	
 		}
-	++z;
 	}
 
-	return charVector.at(0); // return first index char [] which was appended to with ea iteration
+	std::cout << "\nNew directory: " << charVector.at(0) << std::endl;
+	return;
 };
 
 
@@ -29,13 +27,16 @@ char* multiStrCat(std::vector<char *> charVector){
 void nameDirectory(char *dir_ptr, const int &maxDirSize, bool &dirCheck, LPSECURITY_ATTRIBUTES access,
 		void(*func)(bool &dirCheck, LPSECURITY_ATTRIBUTES access, char *dir_ptr)){
    		// enter name of new directory folder .. append to dir
-	char folderName [25] {"NNF"}; //no name folder -> default
+	char folderName [30] {"NNF"}; //no name folder -> default
 	std::cout << "Enter name of new directory folder: " << std::endl;
 	std::cin >> folderName;
 		
+	char backBack[] {"\\"};
+	std::vector <char*> charVector {dir_ptr, backBack, folderName};
+
 		// check to see if string sum of both string lengths < dir size
 	if(std::strlen(dir_ptr) + std::strlen(folderName) < maxDirSize){
-		dir_ptr = std::strcat(dir_ptr, folderName);
+		multiStrCat(charVector);
 		func(dirCheck, access, dir_ptr);
 	}else{
 		char *updatedDir{nullptr};
