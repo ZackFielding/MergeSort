@@ -7,7 +7,7 @@
 // [x] fix multiStrCat
 // windows.h create new dir only works one directory at a time
 // [x] chain create new dir based on number of folders entered by user
-// [] test dynamic mem alloc option if user enters very large directory name
+// [x] test dynamic mem alloc option if user enters very large directory name
 
 void multiStrCat(std::vector<char *> &charVector){ //passbyref vec of char ptrs
 
@@ -30,18 +30,21 @@ void nameDirectory(char *dir_ptr, const int &maxDirSize, bool &dirCheck, LPSECUR
 	std::cout << "Enter name of new directory folder: " << std::endl;
 	std::cin >> folderName;
 		
-		char backBack[] {"\\"};
-	std::vector <char*> charVector {dir_ptr, backBack, folderName};
+	char backBack[] {"\\"};
 	const int baseDirSize {(int)std::strlen(dir_ptr)};
 
 		// check to see if string sum of both string lengths < dir size
 	if(std::strlen(dir_ptr) + std::strlen(folderName) < maxDirSize){
+		std::vector <char*> charVector {dir_ptr, backBack, folderName};
 		multiStrCat(charVector);
 		func(dirCheck, access, dir_ptr, maxDirSize, baseDirSize);
 	}else{
+		std::cerr << "new alloc route entered." << std::endl;
 		char *updatedDir{nullptr};
-		updatedDir = new char [std::strlen(dir_ptr) + std::strlen(folderName) + 5];
-		//func(dirCheck, access, updatedDir); //UPDATED ONCE NON-DYNAMIC CALL WORKS
+		updatedDir = new char [std::strlen(dir_ptr) + std::strlen(folderName) + 5] {'\0'};
+		std::vector <char*> charVector {updatedDir, dir_ptr, backBack, folderName};
+		multiStrCat(charVector);
+		func(dirCheck, access, updatedDir, maxDirSize, baseDirSize); 
 		delete [] updatedDir; // free heap
 	}	
 
